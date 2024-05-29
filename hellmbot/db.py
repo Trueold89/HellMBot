@@ -10,14 +10,19 @@ from enum import Enum
 ##############################
 
 
-# Data types for sqlite table columns
 class DBColumnsTypes(Enum):
+    """
+    Data types for sqlite table columns
+    """
     stroke = "TEXT"
     integer_number = "INTEGER"
     float_number = "FLOAT"
 
 
 class DataBase(object):
+    """
+    Describes the interaction with the database sqlite3
+    """
     DB_PATH = ENV.DB_PATH
 
     @staticmethod
@@ -56,9 +61,7 @@ class DataBase(object):
         :param table: Name of the table
         :param columns: Columns in the table
         """
-        request = f"""
-        CREATE TABLE IF NOT EXISTS {table}
-        (id INTEGER PRIMARY KEY, {self.__getcolumns(columns)})"""
+        request = f"CREATE TABLE IF NOT EXISTS {table} (id INTEGER PRIMARY KEY, {self.__getcolumns(columns)})"
         self.execute(request)
 
     def insert(self, table: str, items: dict[str: Any]) -> None:
@@ -71,8 +74,7 @@ class DataBase(object):
         columns = [title.lower() for title in tuple(items.keys())]
         columns = ", ".join(columns)
         values = list(items.values())
-        request = f"""
-        INSERT INTO {table} ({columns}) VALUES ({("?, " * len(values))[:-2]})"""
+        request = f"INSERT INTO {table} ({columns}) VALUES ({("?, " * len(values))[:-2]})"
         self.execute(request, values)
 
     def get(self, table: str, column: list[str] = None, where: dict[str: Any] = None, order: str = None) -> list[Any]:
@@ -85,22 +87,22 @@ class DataBase(object):
         :param order: sqlite query order syntax stroke
         :return: List of values from table
         """
-        values = None
-        if column is None:
+        args = None
+        if column is None:  # if no column is specified, all columns are used by default
             column = "*"
         else:
             column = ", ".join(i.lower() for i in column)
         request = [f"SELECT {column} FROM {table}"]
         if where is not None:
-            values = list(where.values())
-            where = f"WHERE {", ".join(tuple(where.keys()))} = ({("?, " * len(values))[:-2]})"
+            args = list(where.values())
+            where = f"WHERE {", ".join(tuple(where.keys()))} = ({("?, " * len(args))[:-2]})"
             request.append(where)
         if order is not None:
             order = f"ORDER BY {order}"
             request.append(order)
         request = [" ".join(request)]
-        if values is not None:
-            request.append(values)
+        if args is not None:
+            request.append(args)
         with sqlite(self.DB_PATH) as db:
             cursor = db.cursor()
             cursor.execute(*request)
@@ -113,13 +115,24 @@ class DataBase(object):
 
 
 class ServersDB(DataBase):
-    TABLE = "servers"
+    """
+    Describes the server channel table in the database
+
+    Attributes:
+    - channels (tuple) - Tuple of server channel id's
+    """
+    TABLE = "servers"  # Table name constant
 
     def __init__(self, server_id: int) -> None:
+        """
+        Init Server DataBase object
+
+        :param server_id: id of discord server
+        """
         self.gentable(self.TABLE, {
-            "server_id": DBColumnsTypes.integer_number,
-            "channel_id": DBColumnsTypes.integer_number,
-            "loop": DBColumnsTypes.integer_number
+            "server_id": DBColumnsTypes.integer_number,  # id of discord server
+            "channel_id": DBColumnsTypes.integer_number,  # id of discord voice channel id
+            "loop": DBColumnsTypes.integer_number  # Channel sequence number 
         })
         self.server = server_id
 
@@ -144,7 +157,7 @@ class ServersDB(DataBase):
         })
 
     @property
-    def get_channels(self) -> tuple:
+    def channels(self) -> tuple:
         """
         Returns tuple of server channel id's
 
@@ -165,7 +178,7 @@ class ServersDB(DataBase):
         """
         Returns iterable object of server channel id's
         """
-        return iter(self.get_channels)
+        return iter(self.channels)
 
     def __bool__(self) -> bool:
         """
