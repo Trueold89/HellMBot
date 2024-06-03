@@ -45,7 +45,7 @@ class ENV(object):
         env = environ.get("CIRCLES_COUNT")
         if env is None:
             env = 9
-        return env
+        return int(env)
 
     @property
     def CLIENT_ID(self) -> str:
