@@ -2,7 +2,8 @@
 
 from hellmbot.env import ENV
 from hellmbot.db import ServersDB
-from discord import Intents, Member, VoiceState
+from discord import Intents, Member, VoiceState, Permissions
+from discord.utils import oauth_url
 from discord.ext import commands
 
 
@@ -17,6 +18,7 @@ def init_bot() -> commands.Bot:
     :return: Bot class object
     """
     intents = Intents.default()
+    intents.members = True
     intents.message_content = True
     return commands.Bot(command_prefix="/", intents=intents)
 
@@ -30,6 +32,19 @@ def start() -> None:
     Starts bot polling
     """
     bot.run(ENV.BOT_TOKEN.fget(None))
+
+
+@bot.event
+async def on_ready() -> None:
+    """
+    Displays a link to add a bot to the server
+    """
+    client_id = ENV.CLIENT_ID.fget(None)
+    invite = oauth_url(client_id, permissions=Permissions(
+        manage_channels=True,
+        move_members=True
+    ))
+    print(f"Your bot invite link: {invite}")
 
 
 @bot.command()
@@ -54,7 +69,7 @@ user_before_channels = {}
 
 
 @bot.event
-async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState):
+async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState) -> None:
     """
     Moves the user through the group channels if the user has been connected to one of them
 
