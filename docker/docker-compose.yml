@@ -1,0 +1,10 @@
+services:
+  qbitdl_bot:
+    image: git.orudo.ru/trueold89/hellmbot:latest
+    container_name: HellMBot 
+    volumes:
+      - hellm_db:/etc/hellmbot
+    restart: 'unless-stopped'
+    environment:
+      BOT_TOKEN: "insertyourbottokenhere"
+      CLIENT_ID: "insertyourclientidhere"
