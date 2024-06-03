@@ -2,7 +2,7 @@
 
 from hellmbot.env import ENV
 from hellmbot.db import ServersDB
-from discord import Intents
+from discord import Intents, Member, VoiceState
 from discord.ext import commands
 
 
@@ -48,6 +48,40 @@ async def create(ctx: commands.Context) -> None:
     for circle in range(circles_count):
         vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)
         db.add_channel(vc.id, circle + 1)
+
+
+user_before_channels = {}
+
+
+@bot.event
+async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState):
+    """
+    Moves the user through the group channels if the user has been connected to one of them
+
+    :param member: Discord member class objet
+    :param before: Before state of voice channel
+    :param after: After state of voice channel
+    """
+    server = member.guild.id
+    if before.channel != after.channel:
+        db = ServersDB(server)
+        channels = db.channels
+        if after.channel and after.channel.id in channels:
+            if member.id not in tuple(user_before_channels.keys()):
+                user_before_channels[member.id] = None
+                if before.channel is not None:
+                    user_before_channels[member.id] = before.channel.id
+            current_idx = channels.index(after.channel.id)
+            if current_idx + 1 != len(channels):
+                next_channel = bot.get_channel(channels[current_idx + 1])
+            else:
+                next_id = user_before_channels[member.id]
+                del user_before_channels[member.id]
+                if next_id is None:
+                    next_channel = next_id
+                else:
+                    next_channel = bot.get_channel(next_id)
+            await member.move_to(next_channel)
 
 
 if __name__ == "__main__":
