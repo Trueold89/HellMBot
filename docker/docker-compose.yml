@@ -1,5 +1,5 @@
 services:
-  qbitdl_bot:
+  hellm_bot:
     image: git.orudo.ru/trueold89/hellmbot:latest
     container_name: HellMBot 
     volumes:
@@ -8,3 +8,5 @@ services:
     environment:
       BOT_TOKEN: "insertyourbottokenhere"
       CLIENT_ID: "insertyourclientidhere"
+  volumes:
+    hellm_db:

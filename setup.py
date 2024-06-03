@@ -12,6 +12,6 @@ setup(
     long_description=open("README.md").read(),
     install_requires=["discord.py"],
     entry_points={
-        "console_scripts": ["hellm = hellmbot.bot:main"]
+        "console_scripts": ["hellm = hellmbot.bot:start"]
     }
 )
