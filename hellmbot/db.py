@@ -39,7 +39,7 @@ class DataBase(object):
         lst = [f"{column_title.lower()} {column_type.value}" for column_title, column_type in lst]
         return ", ".join(lst)
 
-    def execute(self, request: str, params: list[Any] = None) -> None:
+    def _execute(self, request: str, params: list[Any] = None) -> None:
         """
         Executes sqlite query
 
@@ -54,7 +54,7 @@ class DataBase(object):
             cursor.execute(request, params)
             db.commit()
 
-    def gentable(self, table: str, columns: dict[str: DBColumnsTypes]) -> None:
+    def _gentable(self, table: str, columns: dict[str: DBColumnsTypes]) -> None:
         """
         Generates table in the database
 
@@ -62,9 +62,9 @@ class DataBase(object):
         :param columns: Columns in the table
         """
         request = f"CREATE TABLE IF NOT EXISTS {table} (id INTEGER PRIMARY KEY, {self.__getcolumns(columns)})"
-        self.execute(request)
+        self._execute(request)
 
-    def insert(self, table: str, items: dict[str: Any]) -> None:
+    def _insert(self, table: str, items: dict[str: Any]) -> None:
         """
         Inserts data into a field of a database table
 
@@ -75,9 +75,9 @@ class DataBase(object):
         columns = ", ".join(columns)
         values = list(items.values())
         request = f"INSERT INTO {table} ({columns}) VALUES ({("?, " * len(values))[:-2]})"
-        self.execute(request, values)
+        self._execute(request, values)
 
-    def get(self, table: str, column: list[str] = None, where: dict[str: Any] = None, order: str = None) -> list[Any]:
+    def _get(self, table: str, column: list[str] = None, where: dict[str: Any] = None, order: str = None) -> list[Any]:
         """
         Returns data from sqlite table
 
@@ -108,10 +108,10 @@ class DataBase(object):
             cursor.execute(*request)
             return cursor.fetchall()
 
-    def delete(self, table: str, where: dict[str: Any]) -> None:
+    def _delete(self, table: str, where: dict[str: Any]) -> None:
         values = list(where.values())
         request = f"DELETE FROM {table} WHERE {", ".join(tuple(where.keys()))} = ({("?, " * len(values))[:-2]})"
-        self.execute(request, values)
+        self._execute(request, values)
 
 
 class ServersDB(DataBase):
@@ -129,7 +129,7 @@ class ServersDB(DataBase):
 
         :param server_id: id of discord server
         """
-        self.gentable(self.TABLE, {
+        self._gentable(self.TABLE, {
             "server_id": DBColumnsTypes.integer_number,  # id of discord server
             "channel_id": DBColumnsTypes.integer_number,  # id of discord voice channel id
             "loop": DBColumnsTypes.integer_number  # Channel sequence number 
@@ -140,20 +140,22 @@ class ServersDB(DataBase):
         """
         Checks the existence of the server in the database table
         """
-        lst = self.get(self.TABLE, ["server_id"])
+        lst = self._get(self.TABLE, ["server_id"])
         if len(lst) > 0:
             return True
         return False
 
-    def add_channel(self, channel_id: int) -> None:
+    def add_channel(self, channel_id: int, loop_number: int) -> None:
         """
         Adds channel to the database
 
         :param channel_id: id of discord channel
+        :param loop_number: Channel sequence number in the group
         """
-        self.insert(self.TABLE, {
+        self._insert(self.TABLE, {
             "server_id": self.server,
-            "channel_id": channel_id
+            "channel_id": channel_id,
+            "loop": loop_number
         })
 
     @property
@@ -163,7 +165,7 @@ class ServersDB(DataBase):
 
         :return: tuple of server channel id's
         """
-        lst = self.get(self.TABLE, ["channel_id"], {"server_id": self.server}, "loop")
+        lst = self._get(self.TABLE, ["channel_id"], {"server_id": self.server}, "loop")
         if len(lst) == 0:
             raise IndexError("This server has no added channels")
         return tuple(map(lambda element: element[0], lst))
@@ -172,7 +174,7 @@ class ServersDB(DataBase):
         """
         Deletes all server channels from the database
         """
-        self.delete(self.TABLE, {"server_id": self.server})
+        self._delete(self.TABLE, {"server_id": self.server})
 
     def __iter__(self) -> Iterable[int]:
         """
