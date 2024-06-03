@@ -46,3 +46,16 @@ class ENV(object):
         if env is None:
             env = 9
         return env
+
+    @property
+    def CLIENT_ID(self) -> str:
+        """
+        Gets the Discord Client ID from the system environment
+
+        :return: Discord Client ID
+        """
+        env = environ.get("CLIENT_ID")
+        if env is None:
+            raise ValueError("client id is not set\nTry to install the system ENV CLIENT_ID\n(export "
+                             "CLIENT_ID=insertyourclientidhere)")
+        return env
