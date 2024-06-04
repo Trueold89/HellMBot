@@ -1,23 +1,20 @@
 # HellMBot
 
-### Discord bot that will wake your friends up from full mute by putting them through 9 circles of hell
+### Discord bot that will wake your friends up from full mute by putting them through 9 circles of hell 🔥
 
-![](https://cdn.orudo.ru/.work/trueold89/git/hellm/Header.png)
+![](https://cdn.orudo.ru/.work/trueold89/git/hellm/Header.svg)
 
-## Source code:
-[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/orudo.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://git.orudo.ru/trueold89/HellMBot)
-[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/github.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://github.com/Trueold89/HellMBot)
-
-***
-
-![](https://cdn.orudo.ru/.work/trueold89/git/hellm/example.gif)
+## 🔗 Links:
+[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/ORUDO.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://git.orudo.ru/trueold89/HellMBot)
+[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/GitHub.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://github.com/Trueold89/HellMBot)
+[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/GitLab.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://gitlab.com/Trueold89/hellmbot)
+[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/Discord.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://discord.com/oauth2/authorize?client_id=1247176574969577514)
 
 ***
 
-## Usage:
+## ⁉️ Usage:
 
-
-![](https://cdn.orudo.ru/.work/trueold89/git/hellm/faq.png)
+![](https://cdn.orudo.ru/.work/trueold89/git/hellm/faq.svg)
 
 ---
 
@@ -28,14 +25,14 @@
 - **Move any user (or yourself, if you're a masochist) to any of the channels in the group created by bot**
 - **Have fun!**
 
-## Deploy:
+## 📦 Deploy:
 
 ***
 
 ### Python venv:
 
 
-![](https://cdn.orudo.ru/.work/trueold89/git/hellm/python.png)
+![](https://cdn.orudo.ru/.work/trueold89/git/hellm/python.svg)
 
 - **Install python package from [git.orudo.ru](https://git.orudo.ru/trueold89/HellMBot/packages)**:
 ```shell
@@ -83,7 +80,7 @@ heelm
 
 ### Docker:
 
-![](https://cdn.orudo.ru/.work/trueold89/git/hellm/docker.png)
+![](https://cdn.orudo.ru/.work/trueold89/git/hellm/docker.svg)
 
 - **Pull image from [git.orudo.ru](https://git.orudo.ru/trueold89/HellMBot/packages)**:
 ```shell
@@ -128,7 +125,7 @@ docker run \
 
 ```yml
 services:
-  qbitdl_bot:
+  hellm_bot:
     image: git.orudo.ru/trueold89/hellmbot:latest
     container_name: HellMBot 
     volumes:
@@ -137,6 +134,8 @@ services:
     environment:
       BOT_TOKEN: "insertyourbottokenhere"
       CLIENT_ID: "insertyourclientidhere"
+volumes:
+    hellm_db:
 ```
 
 ```shell
@@ -145,7 +144,7 @@ docker compose up -d
 
 ***
 
-## Available system environment variables
+## 📋 Available system environment variables
 
 ***
 

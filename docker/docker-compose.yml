@@ -8,5 +8,5 @@ services:
     environment:
       BOT_TOKEN: "insertyourbottokenhere"
       CLIENT_ID: "insertyourclientidhere"
-  volumes:
-    hellm_db:
+volumes:
+  hellm_db:
