@@ -61,6 +61,10 @@ async def create(ctx: commands.Context) -> None:
     group = await server.create_category(f"{circles_count} Circles of Hell")
     await ctx.send("Creating vc's...", ephemeral=True)
     if db:
+        channels = db.channels
+        for channel in channels:
+            channel = bot.get_channel(channel)
+            await channel.delete()
         db.clear_channels()
     for circle in range(circles_count):
         vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)
