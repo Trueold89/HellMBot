@@ -39,6 +39,7 @@ async def on_ready() -> None:
     """
     Displays a link to add a bot to the server
     """
+    await bot.tree.sync()
     client_id = ENV.CLIENT_ID.fget(None)
     invite = oauth_url(client_id, permissions=Permissions(
         manage_channels=True,
@@ -47,7 +48,7 @@ async def on_ready() -> None:
     print(f"Your bot invite link: {invite}")
 
 
-@bot.command()
+@bot.hybrid_command(name="create", description="Creates a group of vc to move users")
 async def create(ctx: commands.Context) -> None:
     """
     Creates a group of voice channels to move the user and adds their id to the database
@@ -58,6 +59,7 @@ async def create(ctx: commands.Context) -> None:
     db = ServersDB(server.id)
     circles_count = ENV.CIRCLES_COUNT.fget(None)
     group = await server.create_category(f"{circles_count} Circles of Hell")
+    await ctx.send("Creating vc's...", ephemeral=True)
     if db:
         db.clear_channels()
     for circle in range(circles_count):
