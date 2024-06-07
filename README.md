@@ -20,7 +20,6 @@
 
 - **Add bot to your server**
 - **Update the bot's permissions to prevent unnecessary people from using its commands (optional)**
-- **Type /create in any text chat you want**
 - **Write `/create` in whatever text chat you want**
 - **Move any user (or yourself, if you're a masochist) to any of the channels in the group created by bot**
 - **Have fun!**
@@ -152,3 +151,9 @@ docker compose up -d
 - `CLIENT_ID` - **Discord Application ID** *[(How to get)](https://docs.discordadvertising.com/getting-your-application-id)*
 - `DB_PATH` - **Path to SQLite DataBase file** *(Optional | Highly recommended to change when running bot on Windows systems) (Default Value: "/etc/hellmbot/database.sqlite")*
 - `CIRCLES_COUNT` - **Number of channels the bot creates when the "/create" command is activated.** *(Optional)* *(Default value: 9)*
+
+## Other:
+
+**[Design file (Figma Community)](https://www.figma.com/community/file/1380949720890295687/hellm-bot)**
+
+[![](https://i.imgur.com/SFpy2G2.png)](https://www.figma.com/community/file/1380949720890295687/hellm-bot)
