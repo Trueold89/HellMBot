@@ -140,7 +140,7 @@ class ServersDB(DataBase):
         """
         Checks the existence of the server in the database table
         """
-        lst = self._get(self.TABLE, ["server_id"])
+        lst = self._get(self.TABLE, ["server_id"], {"server_id": self.server})
         if len(lst) > 0:
             return True
         return False
