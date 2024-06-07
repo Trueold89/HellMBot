@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="HellMBot",
-    version="0.1",
+    version="0.2",
     url="https://git.orudo.ru/trueold89/HellMBot",
     author="trueold89",
     author_email="trueold89@orudo.ru",

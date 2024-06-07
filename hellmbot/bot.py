@@ -2,7 +2,7 @@
 
 from hellmbot.env import ENV
 from hellmbot.db import ServersDB
-from discord import Intents, Member, VoiceState, Permissions
+from discord import Intents, Member, VoiceState, Permissions, errors
 from discord.utils import oauth_url
 from discord.ext import commands
 
@@ -48,6 +48,33 @@ async def on_ready() -> None:
     print(f"Your bot invite link: {invite}")
 
 
+async def clear_channels(db: ServersDB) -> None:
+    """
+    Clear previously created channels
+
+    :param db: Database
+    """
+    channels = db.channels
+    for channel in channels:
+        channel = bot.get_channel(channel)
+        await channel.delete()
+    db.clear_channels()
+
+
+async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
+    """
+    Creates a group of voice channels to move the user and adds their id to the database
+
+    :param server: Discord server
+    :param db: Database
+    """
+    circles_count = ENV.CIRCLES_COUNT.fget(None)
+    group = await server.create_category(f"{circles_count} Circles of Hell")
+    for circle in range(circles_count):
+        vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)
+        db.add_channel(vc.id, circle + 1)
+
+
 @bot.hybrid_command(name="create", description="Creates a group of vc to move users")
 async def create(ctx: commands.Context) -> None:
     """
@@ -57,18 +84,14 @@ async def create(ctx: commands.Context) -> None:
     """
     server = ctx.guild
     db = ServersDB(server.id)
-    circles_count = ENV.CIRCLES_COUNT.fget(None)
-    group = await server.create_category(f"{circles_count} Circles of Hell")
-    await ctx.send("Creating vc's...", ephemeral=True)
-    if db:
-        channels = db.channels
-        for channel in channels:
-            channel = bot.get_channel(channel)
-            await channel.delete()
-        db.clear_channels()
-    for circle in range(circles_count):
-        vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)
-        db.add_channel(vc.id, circle + 1)
+    await ctx.send("Creating group...", ephemeral=True)
+    try:
+        if db:
+            await clear_channels(db)
+        await create_group(server, db)
+        await ctx.send("Group was created! HF!", ephemeral=True)
+    except errors.Any:
+        await ctx.send("An error occurred!", ephemeral=True)
 
 
 user_before_channels = {}
