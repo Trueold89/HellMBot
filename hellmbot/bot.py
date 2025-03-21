@@ -5,6 +5,7 @@ from hellmbot.db import ServersDB
 from discord import Intents, Member, VoiceState, Permissions, errors
 from discord.utils import oauth_url
 from discord.ext import commands
+from asyncio import create_task, gather
 
 
 ###############
@@ -54,11 +55,14 @@ async def clear_channels(db: ServersDB) -> None:
 
     :param db: Database
     """
-    channels = db.channels
-    for channel in channels:
-        channel = bot.get_channel(channel)
-        await channel.delete()
-    db.clear_channels()
+    channels = await db.channels
+
+    async def rm_channel(channel_id: int) -> None:
+        await bot.get_channel(channel_id).delete()
+
+    tasks = tuple(map(lambda ch: create_task(rm_channel(ch)), channels))
+    await gather(*tasks)
+    await db.clear_channels()
 
 
 async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
@@ -68,11 +72,15 @@ async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
     :param server: Discord server
     :param db: Database
     """
+
+    async def task(circle_number: int) -> None:
+        vc = await server.create_voice_channel(f"{circle_number + 1} Circle", category=group)
+        await db.add_channel(vc.id, circle_number + 1)
+
     circles_count = env.CIRCLES_COUNT
     group = await server.create_category(f"{circles_count} Circles of Hell")
     for circle in range(circles_count):
-        vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)
-        db.add_channel(vc.id, circle + 1)
+        await task(circle)
 
 
 @bot.hybrid_command(name="create", description="Creates a group of vc to move users")
@@ -84,9 +92,10 @@ async def create(ctx: commands.Context) -> None:
     """
     server = ctx.guild
     db = ServersDB(server.id)
+    await db.gen_table()
     await ctx.send("Creating group...", ephemeral=True)
     try:
-        if db:
+        if await db.check_server_exists():
             await clear_channels(db)
         await create_group(server, db)
         await ctx.send("Group was created! HF!", ephemeral=True)
@@ -94,7 +103,7 @@ async def create(ctx: commands.Context) -> None:
         await ctx.send("An error occurred!", ephemeral=True)
 
 
-user_before_channels = {}
+lock = []
 
 
 @bot.event
@@ -107,25 +116,25 @@ async def on_voice_state_update(member: Member, before: VoiceState, after: Voice
     :param after: After state of voice channel
     """
     server = member.guild.id
-    if before.channel != after.channel:
-        db = ServersDB(server)
-        channels = db.channels
+    channels = await ServersDB(server).channels
+
+    async def move(initial_channel):
+        current_idx = channels.index(after.channel.id)
+        if current_idx + 1 != len(channels):
+            tasks = tuple(map(lambda i: member.move_to(bot.get_channel(channels[i + 1])),
+                              range(current_idx, len(channels) - 1)))
+            for task in tasks:
+                await task
+        await member.move_to(initial_channel)
+        lock.remove(member.id)
+
+    if member.id not in lock:
         if after.channel and after.channel.id in channels:
-            if member.id not in tuple(user_before_channels.keys()):
-                user_before_channels[member.id] = None
-                if before.channel is not None:
-                    user_before_channels[member.id] = before.channel.id
-            current_idx = channels.index(after.channel.id)
-            if current_idx + 1 != len(channels):
-                next_channel = bot.get_channel(channels[current_idx + 1])
-            else:
-                next_id = user_before_channels[member.id]
-                del user_before_channels[member.id]
-                if next_id is None:
-                    next_channel = next_id
-                else:
-                    next_channel = bot.get_channel(next_id)
-            await member.move_to(next_channel)
+            lock.append(member.id)
+            initial_channel = before.channel
+            if initial_channel is not None:
+                initial_channel = initial_channel.id
+            await move(before.channel)
 
 
 if __name__ == "__main__":
