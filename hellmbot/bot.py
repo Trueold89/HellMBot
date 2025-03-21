@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from hellmbot.env import ENV
+from hellmbot.env import env
 from hellmbot.db import ServersDB
 from discord import Intents, Member, VoiceState, Permissions, errors
 from discord.utils import oauth_url
@@ -31,7 +31,7 @@ def start() -> None:
     """
     Starts bot polling
     """
-    bot.run(ENV.BOT_TOKEN.fget(None))
+    bot.run(env.BOT_TOKEN)
 
 
 @bot.event
@@ -40,7 +40,7 @@ async def on_ready() -> None:
     Displays a link to add a bot to the server
     """
     await bot.tree.sync()
-    client_id = ENV.CLIENT_ID.fget(None)
+    client_id = env.CLIENT_ID
     invite = oauth_url(client_id, permissions=Permissions(
         manage_channels=True,
         move_members=True
@@ -68,7 +68,7 @@ async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
     :param server: Discord server
     :param db: Database
     """
-    circles_count = ENV.CIRCLES_COUNT.fget(None)
+    circles_count = env.CIRCLES_COUNT
     group = await server.create_category(f"{circles_count} Circles of Hell")
     for circle in range(circles_count):
         vc = await server.create_voice_channel(f"{circle + 1} Circle", category=group)

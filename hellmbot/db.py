@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hellmbot.env import ENV
+from hellmbot.env import env
 from sqlite3 import connect as sqlite
 from typing import Any, Iterable
 from enum import Enum
@@ -23,7 +23,7 @@ class DataBase(object):
     """
     Describes the interaction with the database sqlite3
     """
-    DB_PATH = ENV.DB_PATH
+    DB_PATH = env.DB_PATH
 
     @staticmethod
     def __getcolumns(columns: dict[str: DBColumnsTypes]) -> str:

@@ -9,7 +9,7 @@ setup(
     author_email="trueold89@orudo.ru",
     description="Discord bot that will wake your friends up from full mute by putting them through 9 circles of hell",
     packages=["hellmbot"],
-    install_requires=["discord.py"],
+    install_requires=["discord.py", "pydantic", "pydantic_settings"],
     entry_points={
         "console_scripts": ["hellm = hellmbot.bot:start"]
     }
