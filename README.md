@@ -1,13 +1,10 @@
 # HellMBot
 
-### Discord bot that will wake your friends up from full mute by putting them through 9 circles of hell 🔥
+### Discord bot that will wake your friends up from deafen by putting them through 9 circles of hell 🔥
 
 ![](https://cdn.orudo.ru/.work/trueold89/git/hellm/Header.svg)
 
 ## 🔗 Links:
-[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/ORUDO.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://git.orudo.ru/trueold89/HellMBot)
-[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/GitHub.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://github.com/Trueold89/HellMBot)
-[<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/GitLab.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://gitlab.com/Trueold89/hellmbot)
 [<img src="https://cdn.orudo.ru/.work/trueold89/git/hellm/Discord.svg" alt="SVG Image" width="300" height="102" style="padding-right: 10px">](https://discord.com/oauth2/authorize?client_id=1247176574969577514)
 
 ***
@@ -26,23 +23,19 @@
 
 ## 📦 Deploy:
 
-***
+
 
 ### Python venv:
 
 
 ![](https://cdn.orudo.ru/.work/trueold89/git/hellm/python.svg)
 
-- **Install python package from [git.orudo.ru](https://git.orudo.ru/trueold89/HellMBot/packages)**:
-```shell
-pip install pip install --extra-index-url https://git.orudo.ru/api/packages/trueold89/pypi/simple/ HellMBot 
-```
-
-- **Or build your own package from sources**:
+### Build package from source:
+---
 
 *Clone source code repo:*
 ```shell
-git clone https://git.orudo.ru/trueold89/HellMBot.git && cd HellMBot
+git clone https://github.com/Trueold89/HellMBot.git && cd HellMBot
 ```
 *Install build deps:*
 ```shell
@@ -60,7 +53,7 @@ pip install dist/*
 
 ---
 
-- **Set [system environment variables](#available-system-environment-variables): (Linux bash example)**
+- **Set [system environment variables](#available-system-environment-variables):**
 ```bash
 export BOT_TOKEN=insertyourbottokenhere
 ```
@@ -81,19 +74,17 @@ heelm
 
 ![](https://cdn.orudo.ru/.work/trueold89/git/hellm/docker.svg)
 
-- **Pull image from [git.orudo.ru](https://git.orudo.ru/trueold89/HellMBot/packages)**:
+- **Pull image from [DockerHub](https://hub.docker.com/r/trueold89/hellm)**:
 ```shell
-docker pull git.orudo.ru/trueold89/hellmbot:latest
+docker pull trueold89/hellm:latest
 ```
 
 - **Or build your own image:**
 
 *Clone source code repo:*
 ```shell
-git clone https://git.orudo.ru/trueold89/HellMBot.git && cd HellMBot/docker
+git clone https://github.com/Trueold89/HellMBot.git
 ```
-
-*Edit the Dockerfile with your changes (Optional)*
 
 *Build image:*
 ```shell
@@ -117,24 +108,27 @@ docker run \
  -v hellm_db:/etc/hellmbot/
  -e BOT_TOKEN="insertyourbottokenhere" \
  -e CLIENT_ID="insertyourclientidhere" \
- -d git.orudo.ru/trueold89/hellmbot:latest
+ -d trueold89/hellm:latest
 ```
 
 - **Or using docker-compose:**
 
-```yml
+```yaml
 services:
   hellm_bot:
-    image: git.orudo.ru/trueold89/hellmbot:latest
+    image: trueold89/hellm:latest
     container_name: HellMBot 
-    volumes:
-      - hellm_db:/etc/hellmbot
-    restart: 'unless-stopped'
     environment:
       BOT_TOKEN: "insertyourbottokenhere"
       CLIENT_ID: "insertyourclientidhere"
+      DB_PATH: "/etc/hellmbot/database.sqlite"
+      CIRCLES_COUNT: 9
+    volumes:
+      - hellm:/etc/hellmbot
+    restart: 'unless-stopped'
+
 volumes:
-    hellm_db:
+  hellm:
 ```
 
 ```shell
