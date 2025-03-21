@@ -1,0 +1,8 @@
+.idea
+venv
+__pycache__
+*.egg-info
+dist
+README.md
+LICENSE
+docker-compose.yml

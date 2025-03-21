@@ -1,12 +1,15 @@
 services:
   hellm_bot:
-    image: git.orudo.ru/trueold89/hellmbot:latest
+    build: .
     container_name: HellMBot 
-    volumes:
-      - hellm_db:/etc/hellmbot
-    restart: 'unless-stopped'
     environment:
       BOT_TOKEN: "insertyourbottokenhere"
       CLIENT_ID: "insertyourclientidhere"
+      DB_PATH: "/etc/hellmbot/database.sqlite"
+      CIRCLES_COUNT: 9
+    volumes:
+      - hellm:/etc/hellmbot
+    restart: 'unless-stopped'
+
 volumes:
-  hellm_db:
+  hellm:
