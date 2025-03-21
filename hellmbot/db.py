@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from hellmbot.env import env
 from hellmbot.logger import logger
-# from sqlite3 import connect as sqlite
 from aiosqlite import connect as sqlite_connect
 from typing import Any, Iterable
 from enum import Enum
@@ -16,6 +15,7 @@ class DBColumnsTypes(Enum):
     """
     Data types for sqlite table columns
     """
+
     stroke = "TEXT"
     integer_number = "INTEGER"
     float_number = "FLOAT"
@@ -25,10 +25,11 @@ class DataBase(object):
     """
     Describes the interaction with the database sqlite3
     """
+
     DB_PATH = env.DB_PATH
 
     @staticmethod
-    def __getcolumns(columns: dict[str: DBColumnsTypes]) -> str:
+    def __getcolumns(columns: dict[str:DBColumnsTypes]) -> str:
         """
         Converts dictionary to a string for a sqlite query
 
@@ -38,7 +39,10 @@ class DataBase(object):
         keys = tuple(columns.keys())
         values = tuple(columns.values())
         lst = zip(keys, values)
-        lst = [f"{column_title.lower()} {column_type.value}" for column_title, column_type in lst]
+        lst = [
+            f"{column_title.lower()} {column_type.value}"
+            for column_title, column_type in lst
+        ]
         return ", ".join(lst)
 
     async def _execute(self, request: str, params: Iterable[Any] = None) -> None:
@@ -56,7 +60,7 @@ class DataBase(object):
             await cursor.execute(request, params)
             await db.commit()
 
-    async def _gentable(self, table: str, columns: dict[str: DBColumnsTypes]) -> None:
+    async def _gentable(self, table: str, columns: dict[str:DBColumnsTypes]) -> None:
         """
         Generates table in the database
 
@@ -66,7 +70,7 @@ class DataBase(object):
         request = f"CREATE TABLE IF NOT EXISTS {table} (id INTEGER PRIMARY KEY, {self.__getcolumns(columns)})"
         await self._execute(request)
 
-    async def _insert(self, table: str, items: dict[str: Any]) -> None:
+    async def _insert(self, table: str, items: dict[str:Any]) -> None:
         """
         Inserts data into a field of a database table
 
@@ -76,11 +80,18 @@ class DataBase(object):
         columns = [title.lower() for title in tuple(items.keys())]
         columns = ", ".join(columns)
         values = tuple(items.values())
-        request = f"INSERT INTO {table} ({columns}) VALUES ({("?, " * len(values))[:-2]})"
+        request = (
+            f"INSERT INTO {table} ({columns}) VALUES ({('?, ' * len(values))[:-2]})"
+        )
         await self._execute(request, values)
 
-    async def _get(self, table: str, column: list[str] = None, where: dict[str: Any] = None, order: str = None) -> list[
-        Any]:
+    async def _get(
+        self,
+        table: str,
+        column: list[str] = None,
+        where: dict[str:Any] = None,
+        order: str = None,
+    ) -> list[Any]:
         """
         Returns data from sqlite table
 
@@ -98,7 +109,9 @@ class DataBase(object):
         request = [f"SELECT {column} FROM {table}"]
         if where is not None:
             args = list(where.values())
-            where = f"WHERE {", ".join(tuple(where.keys()))} = ({("?, " * len(args))[:-2]})"
+            where = (
+                f"WHERE {', '.join(tuple(where.keys()))} = ({('?, ' * len(args))[:-2]})"
+            )
             request.append(where)
         if order is not None:
             order = f"ORDER BY {order}"
@@ -111,9 +124,9 @@ class DataBase(object):
             await cursor.execute(*request)
             return await cursor.fetchall()
 
-    async def _delete(self, table: str, where: dict[str: Any]) -> None:
+    async def _delete(self, table: str, where: dict[str:Any]) -> None:
         values = list(where.values())
-        request = f"DELETE FROM {table} WHERE {", ".join(tuple(where.keys()))} = ({("?, " * len(values))[:-2]})"
+        request = f"DELETE FROM {table} WHERE {', '.join(tuple(where.keys()))} = ({('?, ' * len(values))[:-2]})"
         await self._execute(request, values)
 
 
@@ -124,6 +137,7 @@ class ServersDB(DataBase):
     Attributes:
     - channels (tuple) - Tuple of server channel id's
     """
+
     TABLE = "servers"  # Table name constant
 
     def __init__(self, server_id: int) -> None:
@@ -135,11 +149,14 @@ class ServersDB(DataBase):
         self.server = server_id
 
     async def gen_table(self):
-        await self._gentable(self.TABLE, {
-            "server_id": DBColumnsTypes.integer_number,  # id of discord server
-            "channel_id": DBColumnsTypes.integer_number,  # id of discord voice channel id
-            "loop": DBColumnsTypes.integer_number  # Channel sequence number
-        })
+        await self._gentable(
+            self.TABLE,
+            {
+                "server_id": DBColumnsTypes.integer_number,  # id of discord server
+                "channel_id": DBColumnsTypes.integer_number,  # id of discord voice channel id
+                "loop": DBColumnsTypes.integer_number,  # Channel sequence number
+            },
+        )
         logger.info("The database was initialized successfully")
 
     async def check_server_exists(self) -> bool:
@@ -158,11 +175,10 @@ class ServersDB(DataBase):
         :param channel_id: id of discord channel
         :param loop_number: Channel sequence number in the group
         """
-        await self._insert(self.TABLE, {
-            "server_id": self.server,
-            "channel_id": channel_id,
-            "loop": loop_number
-        })
+        await self._insert(
+            self.TABLE,
+            {"server_id": self.server, "channel_id": channel_id, "loop": loop_number},
+        )
 
     @property
     async def channels(self) -> tuple:
@@ -171,7 +187,9 @@ class ServersDB(DataBase):
 
         :return: tuple of server channel id's
         """
-        lst = await self._get(self.TABLE, ["channel_id"], {"server_id": self.server}, "loop")
+        lst = await self._get(
+            self.TABLE, ["channel_id"], {"server_id": self.server}, "loop"
+        )
         if len(lst) == 0:
             raise IndexError("This server has no added channels")
         return tuple(map(lambda element: element[0], lst))
@@ -181,4 +199,6 @@ class ServersDB(DataBase):
         Deletes all server channels from the database
         """
         await self._delete(self.TABLE, {"server_id": self.server})
-        logger.info(f"server id {self.server} channels have been successfully cleaned from database")
+        logger.info(
+            f"server id {self.server} channels have been successfully cleaned from database"
+        )

@@ -14,6 +14,7 @@ from asyncio import run as aiorun
 # Bot's logic #
 ###############
 
+
 def init_bot() -> commands.Bot:
     """
     Initializes the bot object
@@ -45,10 +46,9 @@ async def on_ready() -> None:
     """
     await bot.tree.sync()
     client_id = env.CLIENT_ID
-    invite = oauth_url(client_id, permissions=Permissions(
-        manage_channels=True,
-        move_members=True
-    ))
+    invite = oauth_url(
+        client_id, permissions=Permissions(manage_channels=True, move_members=True)
+    )
     logger.info(f"Your bot invite link: {invite}")
 
 
@@ -77,7 +77,9 @@ async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
     """
 
     async def task(circle_number: int) -> None:
-        vc = await server.create_voice_channel(f"{circle_number + 1} Circle", category=group)
+        vc = await server.create_voice_channel(
+            f"{circle_number + 1} Circle", category=group
+        )
         await db.add_channel(vc.id, circle_number + 1)
 
     circles_count = env.CIRCLES_COUNT
@@ -110,7 +112,9 @@ lock = []
 
 
 @bot.event
-async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState) -> None:
+async def on_voice_state_update(
+    member: Member, before: VoiceState, after: VoiceState
+) -> None:
     """
     Moves the user through the group channels if the user has been connected to one of them
 
@@ -123,10 +127,16 @@ async def on_voice_state_update(member: Member, before: VoiceState, after: Voice
 
     async def move(initial_channel):
         current_idx = channels.index(after.channel.id)
-        logger.info(f"Moving member {member.id} on server {server} ({len(channels) - current_idx} loops)")
+        logger.info(
+            f"Moving member {member.id} on server {server} ({len(channels) - current_idx} loops)"
+        )
         if current_idx + 1 != len(channels):
-            tasks = tuple(map(lambda i: member.move_to(bot.get_channel(channels[i + 1])),
-                              range(current_idx, len(channels) - 1)))
+            tasks = tuple(
+                map(
+                    lambda i: member.move_to(bot.get_channel(channels[i + 1])),
+                    range(current_idx, len(channels) - 1),
+                )
+            )
             for task in tasks:
                 await task
         await member.move_to(initial_channel)
