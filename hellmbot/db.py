@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from hellmbot.env import env
+from hellmbot.logger import logger
 # from sqlite3 import connect as sqlite
 from aiosqlite import connect as sqlite_connect
 from typing import Any, Iterable
@@ -139,6 +140,7 @@ class ServersDB(DataBase):
             "channel_id": DBColumnsTypes.integer_number,  # id of discord voice channel id
             "loop": DBColumnsTypes.integer_number  # Channel sequence number
         })
+        logger.info("The database was initialized successfully")
 
     async def check_server_exists(self) -> bool:
         """
@@ -179,3 +181,4 @@ class ServersDB(DataBase):
         Deletes all server channels from the database
         """
         await self._delete(self.TABLE, {"server_id": self.server})
+        logger.info(f"server id {self.server} channels have been successfully cleaned from database")

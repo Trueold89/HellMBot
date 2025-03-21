@@ -2,10 +2,12 @@
 
 from hellmbot.env import env
 from hellmbot.db import ServersDB
+from hellmbot.logger import formatter, logger, handler
 from discord import Intents, Member, VoiceState, Permissions, errors
 from discord.utils import oauth_url
 from discord.ext import commands
 from asyncio import create_task, gather
+from asyncio import run as aiorun
 
 
 ###############
@@ -32,7 +34,8 @@ def start() -> None:
     """
     Starts bot polling
     """
-    bot.run(env.BOT_TOKEN)
+    aiorun(ServersDB(0).gen_table())
+    bot.run(env.BOT_TOKEN, log_formatter=formatter, log_handler=handler)
 
 
 @bot.event
@@ -46,7 +49,7 @@ async def on_ready() -> None:
         manage_channels=True,
         move_members=True
     ))
-    print(f"Your bot invite link: {invite}")
+    logger.info(f"Your bot invite link: {invite}")
 
 
 async def clear_channels(db: ServersDB) -> None:
@@ -81,6 +84,7 @@ async def create_group(server: commands.Context.guild, db: ServersDB) -> None:
     group = await server.create_category(f"{circles_count} Circles of Hell")
     for circle in range(circles_count):
         await task(circle)
+    logger.info(f"server id {server.id} channels have been added to database")
 
 
 @bot.hybrid_command(name="create", description="Creates a group of vc to move users")
@@ -92,7 +96,6 @@ async def create(ctx: commands.Context) -> None:
     """
     server = ctx.guild
     db = ServersDB(server.id)
-    await db.gen_table()
     await ctx.send("Creating group...", ephemeral=True)
     try:
         if await db.check_server_exists():
@@ -120,6 +123,7 @@ async def on_voice_state_update(member: Member, before: VoiceState, after: Voice
 
     async def move(initial_channel):
         current_idx = channels.index(after.channel.id)
+        logger.info(f"Moving member {member.id} on server {server} ({len(channels) - current_idx} loops)")
         if current_idx + 1 != len(channels):
             tasks = tuple(map(lambda i: member.move_to(bot.get_channel(channels[i + 1])),
                               range(current_idx, len(channels) - 1)))
